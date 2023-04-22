@@ -1,11 +1,10 @@
-
 import os
 import pathlib
 import sys
 import abc
 import glob
 
-from PySide2 import QtWidgets, QtCore
+from PySide2 import QtWidgets
 import pymel.core as pm
 from rigbaukasten.utils import errorutl, pysideutl
 
@@ -61,6 +60,7 @@ class Environment(AbstractEnvironment):
 
         self._project_path = None
         self._asset_name = None
+        self._asset_type = None
 
     @property
     def asset_name(self):
@@ -71,6 +71,16 @@ class Environment(AbstractEnvironment):
     @asset_name.setter
     def asset_name(self, name):
         self._asset_name = name
+
+    @property
+    def asset_type(self):
+        if self._asset_type is None:
+            raise errorutl.RbkEnvironmentError('Cannot get asset type, set environment first.')
+        return self._asset_type
+
+    @asset_type.setter
+    def asset_type(self, typ):
+        self._asset_type = typ
 
     @property
     def project_path(self):
@@ -93,15 +103,15 @@ class Environment(AbstractEnvironment):
         return self.asset_name
 
     def get_rigdata_path(self):
-        return os.path.join(self.project_path, 'characters', self.asset_name, 'rigdata')
+        return os.path.join(self.project_path, self.asset_type, self.asset_name, 'rigdata')
 
     def get_model_path(self, version=None):
-        models_dir = os.path.join(self.project_path, 'characters', self.asset_name, 'model')
+        models_dir = os.path.join(self.project_path, self.asset_type, self.asset_name, 'model')
         if version:
-            file_name = f'{self.asset_name}_mdl_body_{version:03d}_xx.mb'
+            file_name = f'{self.asset_name}_model_v{version:03d}.ma'
             return os.path.join(models_dir, file_name)
         else:
-            file_name = f'{self.asset_name}_mdl_body_*_xx.mb'
+            file_name = f'{self.asset_name}_model_v*.ma'
             glob_path = os.path.join(models_dir, file_name)
             versions = glob.glob(glob_path)
             versions.sort()
@@ -119,9 +129,9 @@ class Environment(AbstractEnvironment):
     def set(self, *args, **kwargs):
         x = ProjectSetterUi()
         if x.exec_():
-            self._project_path, self._asset_name = x.results()
+            self._project_path, self._asset_type, self._asset_name = x.results()
 
-            print(f'Now working on {self.asset_name} in {self.project_path}')
+            print(f'Now working on {self.asset_type}/{self.asset_name} in {self.project_path}')
 
 
 class ProjectSetterUi(pysideutl.MayaDialog):
@@ -157,79 +167,50 @@ class ProjectSetterUi(pysideutl.MayaDialog):
         path_lay.addWidget(path_btn)
         base_lay.addWidget(path_widget)
 
+        asset_type_lbl = QtWidgets.QLabel('Asset Type:')
+        base_lay.addWidget(asset_type_lbl)
+
+        self.asset_type_cmb = QtWidgets.QComboBox()
+        base_lay.addWidget(self.asset_type_cmb)
+
         asset_lbl = QtWidgets.QLabel('Asset Name:')
         base_lay.addWidget(asset_lbl)
 
         self.asset_cmb = QtWidgets.QComboBox()
-        self.update_asset_cmb()
         base_lay.addWidget(self.asset_cmb)
+
+        self.update_asset_type_cmb()
+        self.update_asset_cmb()
+        self.asset_type_cmb.currentIndexChanged.connect(self.update_asset_cmb)
 
         btn = QtWidgets.QPushButton('OK')
         btn.clicked.connect(self.accept)
         base_lay.addWidget(btn)
 
     def results(self):
-        return self.path_lne.text().strip(), self.asset_cmb.currentText().strip()
+        project_path = self.path_lne.text().strip()
+        asset_type = self.asset_type_cmb.currentText().strip()
+        asset_name = self.asset_cmb.currentText().strip()
+        return project_path, asset_type, asset_name
 
     def set_path(self):
         proj_path = pm.fileDialog2(fm=2, cap='Choose Project', okc='OK')[0].replace('/', os.sep).replace('\\', os.sep)
         self.path_lne.setText(proj_path)
+        self.update_asset_type_cmb()
         self.update_asset_cmb()
+
+    def update_asset_type_cmb(self):
+        self.asset_type_cmb.clear()
+        folder = self.path_lne.text()
+        if os.path.exists(folder):
+            types = [a for a in os.listdir(folder) if a in ('characters', 'vehicles', 'props')]
+            for typ in types:
+                self.asset_type_cmb.addItem(typ)
 
     def update_asset_cmb(self):
         self.asset_cmb.clear()
-        folder = os.path.join(self.path_lne.text(), 'characters')
+        folder = os.path.join(self.path_lne.text(), self.asset_type_cmb.currentText().strip())
         if os.path.exists(folder):
             assets = [a for a in os.listdir(folder) if '.' not in a]
             for asset in assets:
                 self.asset_cmb.addItem(asset)
-
-
-#     maya_project_path = pm.workspace(query=1, rootDirectory=1).replace('/', os.sep).replace('\\', os.sep)
-#
-#     def set_path(*_):
-#         project_path = pm.fileDialog2(fm=2, cap='Choose Project', okc='OK')[0].replace('/', os.sep).replace('\\', os.sep)
-#         pm.textField(self.proj_text, e=True, text=project_path)
-#         update_ui(project_path)
-#
-#     def update_ui(project_path):
-#         clear_asset_names()
-#         folder = os.path.join(project_path, 'characters')
-#         if os.path.exists(folder):
-#             pm.textField(self.proj_text, e=True, text=project_path)
-#             assets = [a for a in os.listdir(folder) if not '.' in a]
-#             set_asset_names(assets)
-#
-#     def clear_asset_names():
-#         for item in pm.optionMenu(self.name_menu, q=True, itemListLong=True) or []:
-#             pm.deleteUI(item)
-#
-#     def set_asset_names(assets):
-#         for asset in assets:
-#             pm.menuItem(l=asset, p=self.name_menu)
-#
-#     if pm.window(self.ui, ex=True):
-#         pm.deleteUI(self.ui)
-#     pm.window(self.ui, title='Rigbaukasten Environment Setter')
-#     pm.columnLayout()
-#     pm.separator()
-#     pm.text(l='Set Environment', fn='boldLabelFont')
-#     pm.separator()
-#     pm.text(l='Project Path:')
-#     pm.rowLayout(nc=2)
-#     pm.textField(self.proj_text, placeholderText='/my/fancy/project/', w=300)
-#     pm.button(l='...', c=set_path)
-#     pm.setParent('..')
-#     pm.separator()
-#     pm.text(l='Asset name:')
-#     pm.optionMenu(self.name_menu)
-#     pm.separator()
-#     pm.button(l='OK', c=self.set_env_from_ui)
-#     update_ui(maya_project_path)
-#     pm.showWindow(self.ui)
-#
-# def set_env_from_ui(self, *_):
-#     self.project_path = pm.textField(self.proj_text, q=True, text=True)
-#     self.asset_name = pm.optionMenu(self.name_menu, q=True, v=True)
-#     pm.deleteUI(self.ui)
-#     # rigbaukasten.environment = self
