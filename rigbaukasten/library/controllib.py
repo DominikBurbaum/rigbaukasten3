@@ -83,10 +83,6 @@ class AnimCtl(object):
 
     def lock(self):
         attrutl.lock([self.trn.attr(attr) for attr in self.lock_attrs])
-        # for attr in self.lock_attrs:
-        #     self.trn.attr(attr).set(lock=True)
-        #     self.trn.attr(attr).set(k=False)
-        #     self.trn.attr(attr).set(cb=False)
 
     def run(self):
         self.create_ctl()

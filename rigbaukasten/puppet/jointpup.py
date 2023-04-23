@@ -66,7 +66,10 @@ class StretchyJoint(modulecor.RigPuppetModule):
         start_offset_trn = pm.group(em=True, n=f'{self.module_key}_guideStartOffset_TRN', p=aim_trn)
         end_offset_trn = pm.group(em=True, n=f'{self.module_key}_guideEndOffset_TRN', p=start_offset_trn)
         # end_trn = pm.group(em=True, n=f'{self.module_key}_guideEnd_TRN', p=self.guides_grp)
-        crv = curvelib.curve_from_transforms(trns=(self.guides[0], self.guides[1]), name=f'{self.module_key}_guideConnector')
+        crv = curvelib.curve_from_transforms(
+            trns=(self.guides[0], self.guides[1]),
+            name=f'{self.module_key}_guideConnector'
+        )
         crv.inheritsTransform.set(False)
         crv.setParent(self.guides_grp)
         crv.template.set(True)

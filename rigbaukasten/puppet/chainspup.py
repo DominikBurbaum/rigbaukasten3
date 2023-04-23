@@ -2,7 +2,7 @@ from rigbaukasten.core import modulecor
 import pymel.core as pm
 
 from rigbaukasten.functions import chainfunc
-from rigbaukasten.library import controllib, guidelib, jointlib
+from rigbaukasten.library import controllib, guidelib
 
 
 class SingleCtl(modulecor.RigPuppetModule):

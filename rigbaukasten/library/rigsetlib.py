@@ -1,4 +1,3 @@
-import logging
 import pymel.core as pm
 
 from rigbaukasten.utils import errorutl, attrutl, pymelutl

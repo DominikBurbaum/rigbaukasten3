@@ -466,23 +466,6 @@ class RigPuppetModule(RigModule):
 
     def connect_puppet_joints(self):
         for p, j in zip(self.puppet_joints, self.joints):
-            # pm.parentConstraint(p, j)
-            # pm.scaleConstraint(p, j)
-
-            # parent = pm.listRelatives(j, p=True)[0]
-            # mmx = connectutl.create_node(
-            #     'multMatrix',
-            #     matrixIn__0___=p.wm[0],
-            #     matrixIn__1___=parent.wim[0],
-            #     matrixSum=j.offsetParentMatrix
-            # )
-            # connectutl.create_node(
-            #     'decomposeMatrix'
-            # )
-            # j.t.set(0, 0, 0)
-            # j.r.set(0, 0, 0)
-            # j.s.set(1, 1, 1)
-            # j.jo.set(0, 0, 0)
             connectutl.simple_matrix_constraint(p, j)
 
     def constraint_to_hook(self, driven, hook=None, prefer_puppet_joint=True):

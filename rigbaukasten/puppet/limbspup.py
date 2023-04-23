@@ -434,17 +434,6 @@ class FKIkLimb(modulecor.RigPuppetModule):
     def delete_position_trns(self):
         pm.delete(self.position_trns.values())
 
-    # def out_joint(self, hook):
-    #     """ Overwrite RigPuppetModule.out_joint to make the string keys foot00 & foot01 work. """
-    #     if isinstance(hook, (list, tuple)):
-    #         index = hook[1]
-    #         if index == 'foot00':
-    #             return self.foot_joints[0]
-    #         elif index == 'foot01':
-    #             return self.foot_joints[1]
-    #         else:
-    #             return super().out_joint(hook)
-
     def skeleton_build_pre(self):
         super().skeleton_build_pre()
         self.create_grps()

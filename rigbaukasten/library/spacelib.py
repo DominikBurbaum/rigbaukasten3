@@ -7,9 +7,9 @@ def add_spaces(ctl, default_target=None, constraint=pm.parentConstraint, **space
     """ Add space switches to the given ctl by creating a group with a blended constraint above it.
 
         :param ctl: PyNode, the ctl that should get the space switch
-        :param default_name: str, name of the space target that should be active by default. All other targets
-                            will be inactive. If the given name does not exist in 'spaces', the first given
-                            space will be used as default.
+        :param default_target: str, name of the space target that should be active by default. All other targets
+                               will be inactive. If the given name does not exist in 'spaces', the first given
+                               space will be used as default.
         :param constraint: type, type of constraint to use, pm.pointConstraint, pm.orientConstraint, [...]
         :param spaces: PyNode, transform nodes that are used as space targets. E.g. main=PyNode('C_main_00_CTL')
     """

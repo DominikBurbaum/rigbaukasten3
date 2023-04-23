@@ -74,6 +74,7 @@ def create_oriented_guide_chain(
     :param world_up: world up vector for the joints
     :param world_up_type: hwo should the up vector be driven, see constants above for options
     :param flip_right_vectors: invert the aim and up vectors if side is R (for easier usage in loops)
+    :param tip_joint_aim: bool - Aim the tip joint based on its parent. If False the tip guide can be freely rotated
     :return:
     """
     if positions and len(positions) != len(labels):
@@ -113,7 +114,9 @@ def create_oriented_guide_chain(
                 if world_up_type == WORLD_AXIS:
                     pm.aimConstraint(guides[-1], jnt, aim=tip_aim, u=up, wu=world_up, wut='vector')
                 elif world_up_type == ROOT_GUIDE:
-                    pm.aimConstraint(guides[-1], jnt, aim=tip_aim, u=up, wu=world_up, wut='objectrotation', wuo=guides[0])
+                    pm.aimConstraint(
+                        guides[-1], jnt, aim=tip_aim, u=up, wu=world_up, wut='objectrotation', wuo=guides[0]
+                    )
                 elif world_up_type == EACH_GUIDE:
                     pm.aimConstraint(guides[-1], jnt, aim=tip_aim, u=up, wu=world_up, wut='objectrotation', wuo=gde)
             else:
@@ -187,13 +190,17 @@ def create_limb_guide_chain(
     pm.aimConstraint(guides[2], joints[1], aim=aim, u=inv_up if as_leg else up, wut='object', wuo=mid_up_trn)
     pm.aimConstraint(guides[3], joints[2], aim=aim, u=inv_up if as_leg else up, wut='object', wuo=mid_up_trn)
     if with_foot:
-        pm.aimConstraint(guides[4], joints[3], aim=aim, u=foot_up, wu=foot_world_up, wut='objectrotation', wuo=guides[3])
-        pm.aimConstraint(guides[5], joints[4], aim=aim, u=foot_up, wu=foot_world_up, wut='objectrotation', wuo=guides[4])
-        pm.aimConstraint(guides[4], joints[5], aim=inv_aim, u=foot_up, wu=foot_world_up, wut='objectrotation', wuo=guides[4])
+        pm.aimConstraint(
+            guides[4], joints[3], aim=aim, u=foot_up, wu=foot_world_up, wut='objectrotation', wuo=guides[3]
+        )
+        pm.aimConstraint(
+            guides[5], joints[4], aim=aim, u=foot_up, wu=foot_world_up, wut='objectrotation', wuo=guides[4]
+        )
+        pm.aimConstraint(
+            guides[4], joints[5], aim=inv_aim, u=foot_up, wu=foot_world_up, wut='objectrotation', wuo=guides[4]
+        )
     else:
         pm.orientConstraint(guides[3], joints[3])
 
     GuideChain = namedtuple('GuideChain', ['grp', 'guides', 'joints'])
     return GuideChain(grp, guides, joints)
-
-
