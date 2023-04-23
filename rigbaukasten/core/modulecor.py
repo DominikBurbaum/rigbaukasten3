@@ -309,6 +309,7 @@ class RigBuild(RigModule):
             grp.overrideDisplayType.set(2)
 
     def run(self, stop_after_step='finalize', stop_after_sub_step='post'):
+        fit_cam = self.current_step is None
         for step_name, step_method in self.build_steps.items():
             if self.current_step and self.current_step >= step_name:
                 continue
@@ -319,7 +320,8 @@ class RigBuild(RigModule):
             # print(f'...{step_name} completed')
             full_stop_step = f'{stop_after_step}_{stop_after_sub_step}' if stop_after_sub_step else stop_after_step
             if step_name == full_stop_step:
-                pm.viewFit('persp', self.geo_grp)
+                if fit_cam:
+                    pm.viewFit('persp', self.geo_grp)
                 break
         self.current_step_completed = True
 
