@@ -3,6 +3,7 @@ import sys
 
 import pymel.core as pm
 
+import rigbaukasten
 from rigbaukasten.core import iocor
 from rigbaukasten.library import jointlib
 from rigbaukasten.utils import errorutl, attrutl, mathutl, connectutl
@@ -272,13 +273,10 @@ class RigModule(object):
 
 
 class RigBuild(RigModule):
-    def __init__(
-            self,
-            asset_name,
-    ):
+    def __init__(self):
         super().__init__(side='C', module_name='assetRootModule')
 
-        self.asset_name = asset_name
+        self.asset_name = rigbaukasten.environment.get_asset_name()
         self.reset_all_modules()
 
         self.modules_grp = None

@@ -2,7 +2,6 @@
 Basic prop template:
 Just a single CTL + main control. For simple props or as a starting point for custom setups.
 """
-import rigbaukasten
 from rigbaukasten.base import geobase
 from rigbaukasten.core import modulecor
 from rigbaukasten.puppet import mainpup, chainspup
@@ -11,7 +10,7 @@ from rigbaukasten.utils.typesutl import Jnt, Ctl
 
 class RigBuild(modulecor.RigBuild):
     def __init__(self):
-        super().__init__(asset_name=rigbaukasten.environment.get_asset_name())
+        super().__init__()
 
         self.add_module(geobase.Model(
             version=None

@@ -2,7 +2,6 @@
 Simple biped template:
 Basic puppet rig + skinCluster for a biped. No extra joints or advanced deformation.
 """
-import rigbaukasten
 from rigbaukasten.base import geobase
 from rigbaukasten.core import modulecor
 from rigbaukasten.deform import skindef
@@ -13,7 +12,7 @@ from rigbaukasten.utils.typesutl import Jnt, Ctl
 
 class RigBuild(modulecor.RigBuild):
     def __init__(self):
-        super().__init__(asset_name=rigbaukasten.environment.get_asset_name())
+        super().__init__()
 
         self.add_module(geobase.Model(
             version=None
