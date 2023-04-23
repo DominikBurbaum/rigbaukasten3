@@ -16,7 +16,7 @@ class RigBuild(modulecor.RigBuild):
         super().__init__(asset_name=rigbaukasten.environment.get_asset_name())
 
         self.add_module(geobase.Model(
-            path=rigbaukasten.environment.get_model_path(version=None)
+            version=None
         ))
 
         ################################################################################

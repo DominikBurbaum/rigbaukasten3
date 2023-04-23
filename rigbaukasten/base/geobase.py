@@ -1,5 +1,6 @@
 import os
 
+import rigbaukasten
 from rigbaukasten.core import modulecor
 
 import pymel.core as pm
@@ -157,12 +158,17 @@ class FileLoader(modulecor.RigModule):
 class Model(FileLoader):
     def __init__(
             self,
-            path,
+            version=None,
             side='C',
             module_name='model',
             load_step='skeleton_build'
     ):
-        super().__init__(path=path, side=side, module_name=module_name, load_step=load_step)
+        super().__init__(
+            path=rigbaukasten.environment.get_model_path(version=version),
+            side=side,
+            module_name=module_name,
+            load_step=load_step
+        )
 
     def load_file(self):
         self.root_nodes = fileutl.import_file(self.path)
