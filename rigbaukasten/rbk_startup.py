@@ -103,10 +103,10 @@ def open_script_menu(parent_menu, script_file_path):
 
 def create_new_rig_build(*_):
     """ Create a new rig build for the current asset and update the menu. """
-    newrigbuildpip.choose_template_and_create_new_rig_build()
-    time.sleep(.5)
-    rigbaukasten_menu()
-    print('SUCCESS')
+    if newrigbuildpip.choose_template_and_create_new_rig_build():
+        time.sleep(.5)
+        rigbaukasten_menu()
+        print('SUCCESS')
 
 
 def rig_steps_menu(parent_menu, file):

@@ -105,4 +105,4 @@ def choose_template_and_create_new_rig_build():
     x = ChooseRigBuildFromTemplateUi()
     if x.exec_():
         template_name = x.results()
-        new_rig_build_from_template(template_name=template_name)
+        return new_rig_build_from_template(template_name=template_name)
