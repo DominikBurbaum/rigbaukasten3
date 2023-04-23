@@ -218,7 +218,7 @@ def load_guide_mapping(folder):
 def load_guide_mapping_for_mesh(mesh):
     description = get_name_description(mesh)
     try:
-        mapping = get_json_path(folder=description)
+        mapping = load_guide_mapping(folder=description)
     except errorutl.RbkInvalidName:
         pm.warning(f'Check name on {mesh}. Should be named after the folder in resources/guide_meshes. ')
         raise
