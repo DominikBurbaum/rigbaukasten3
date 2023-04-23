@@ -10,12 +10,14 @@ class SingleCtl(modulecor.RigPuppetModule):
             self,
             side,
             module_name,
+            size=1,
             hook=None,
             with_joint=True,
-            size=1,
+            lock_attrs=('sx', 'sy', 'sz', 'v'),
             parent_joint=None
     ):
         super().__init__(side=side, module_name=module_name, size=size, hook=hook, parent_joint=parent_joint)
+        self.lock_attrs = lock_attrs
         self.with_joint = with_joint
 
         self.ctls = []
@@ -47,6 +49,7 @@ class SingleCtl(modulecor.RigPuppetModule):
             module_name=self.module_name,
             ctl_shape='circle',
             size=self.size,
+            lock_attrs=self.lock_attrs,
             pos=self.puppet_joints[0] if self.with_joint else self.gde,
             rot=self.puppet_joints[0] if self.with_joint else self.gde
         )
@@ -122,17 +125,18 @@ class SimpleFk(modulecor.RigPuppetModule):
             side,
             module_name,
             nr_of_joints,
+            size=1,
             joint_labels=None,
             hook=None,
-            size=1,
-            parent_joint=None,
             aim=(1, 0, 0),
             up=(0, 1, 0),
             world_up=(0, 1, 0),
             world_up_type=guidelib.WORLD_AXIS,
             flip_right_vectors=True,
             tip_joint_aim=False,
-            tip_has_ctl=True
+            tip_has_ctl=True,
+            lock_attrs=('sx', 'sy', 'sz', 'v'),
+            parent_joint=None,
     ):
         super().__init__(side=side, module_name=module_name, size=size, hook=hook, parent_joint=parent_joint)
         self.nr_of_joints = nr_of_joints
@@ -144,6 +148,7 @@ class SimpleFk(modulecor.RigPuppetModule):
         self.flip_right_vectors = flip_right_vectors
         self.tip_joint_aim = tip_joint_aim
         self.tip_has_ctl = tip_has_ctl
+        self.lock_attrs = lock_attrs
 
         self.guides = []
         self.ctls = []
@@ -176,7 +181,12 @@ class SimpleFk(modulecor.RigPuppetModule):
         ctl_joints = self.puppet_joints
         if not self.tip_has_ctl and self.nr_of_joints > 1:
             ctl_joints = self.puppet_joints[:-1]
-        self.ctls = chainfunc.fk_chain_from_joints(joints=ctl_joints, label='', size=self.size)
+        self.ctls = chainfunc.fk_chain_from_joints(
+            joints=ctl_joints,
+            label='',
+            size=self.size,
+            lock_attrs=self.lock_attrs
+        )
         self.ctls[0].grp.setParent(self.in_hooks_grp)
         self.publish_nodes['ctls'] += [ctl.trn for ctl in self.ctls]
         for ctl in self.ctls:

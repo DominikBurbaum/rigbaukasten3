@@ -3,7 +3,7 @@ from rigbaukasten.library import controllib, curvelib
 from rigbaukasten.utils import mathutl, connectutl, attrutl
 
 
-def fk_chain_from_joints(joints, label='Fk', size=1):
+def fk_chain_from_joints(joints, label='Fk', size=1, lock_attrs=('sx', 'sy', 'sz', 'v')):
     ctls = []
     for j in joints:
         side, module_name, jnt_label, suffix = j.name().split('_')
@@ -16,6 +16,7 @@ def fk_chain_from_joints(joints, label='Fk', size=1):
             pos=j,
             rot=j,
             size=size,
+            lock_attrs=lock_attrs
         )
         if ctls:
             ctl.grp.setParent(ctls[-1].trn)
