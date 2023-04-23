@@ -3,12 +3,11 @@ import os
 import rigbaukasten
 from rigbaukasten.core import modulecor
 
-import pymel.core as pm
-
 from rigbaukasten.utils import errorutl, fileutl
 
 
 class FileLoader(modulecor.RigModule):
+    """ Load the given file into the scene. """
     def __init__(
             self,
             path,
@@ -16,7 +15,12 @@ class FileLoader(modulecor.RigModule):
             module_name='geo',
             load_step='skeleton_build'
     ):
-        """ Load the given file into the scene. """
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param path: str - path to the file
+        :param load_step: str - At which build step should the file be loaded?
+        """
         super().__init__(side=side, module_name=module_name)
         if os.path.exists(path):
             self.path = path
@@ -156,6 +160,7 @@ class FileLoader(modulecor.RigModule):
 
 
 class Model(FileLoader):
+    """ Load the model for the current asset into the rigs GEO_GRP. """
     def __init__(
             self,
             version=None,
@@ -163,6 +168,12 @@ class Model(FileLoader):
             module_name='model',
             load_step='skeleton_build'
     ):
+        """
+        :param side: str - C, L or R - Should probably always be 'C'
+        :param module_name: str - unique name for the module - Should probably always be 'Model'
+        :param version: int - version of the model, None will load teh latest one
+        :param load_step: str - At which build step should the model be loaded?
+        """
         super().__init__(
             path=rigbaukasten.environment.get_model_path(version=version),
             side=side,

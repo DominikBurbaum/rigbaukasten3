@@ -5,6 +5,7 @@ from rigbaukasten.utils import attrutl, connectutl
 
 
 class MainControl(modulecor.RigPuppetModule):
+    """ The main CTL for the rig (big quad arrow at teh origin). """
     def __init__(
             self,
             side='C',
@@ -12,6 +13,12 @@ class MainControl(modulecor.RigPuppetModule):
             size=1,
             plumbob_hook=None
     ):
+        """
+        :param side: str - C, L or R - should probably always be 'C'
+        :param module_name: str - unique name for the module - should probably always be 'main'
+        :param size: float - default size for the guides and controls
+        :param plumbob_hook: OutDataPointer or PyNode - What should the plumbob (green extra CTL shape) be attached to?
+        """
         super().__init__(side=side, module_name=module_name)
         self.size = size
         self.plumbob_hook = plumbob_hook

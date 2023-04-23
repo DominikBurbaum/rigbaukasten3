@@ -1,12 +1,13 @@
 import pymel.core as pm
 
-from rigbaukasten.core import modulecor, iocor
+from rigbaukasten.core import modulecor
 from rigbaukasten.functions import chainfunc, twistfunc
 from rigbaukasten.library import controllib, jointlib, posereaderlib, guidelib, curvelib
 from rigbaukasten.utils import attrutl, connectutl
 
 
 class FKIkLimb(modulecor.RigPuppetModule):
+    """ Simple fk/ik leg or arm. """
     def __init__(
             self,
             side='L',
@@ -20,14 +21,17 @@ class FKIkLimb(modulecor.RigPuppetModule):
             parent_joint=None
     ):
         """
-
-        :param side:
-        :param module_name:
-        :param size:
-        :param hook:
-        :param ik_hook:
-        :param collision_spread: cheap double knee/elbow effect, push the lower twist joint chain away from the hinge.
-        :param segment_names:
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size for the guides and controls
+        :param hook: OutDataPointer or PyNode - What should the module be attached to?
+        :param ik_hook: OutDataPointer or PyNode - What should the ik CTL (wrist/ankle) be attached to?
+        :param collision_spread: float - For a cheap double knee/elbow effect, we push the lower twist joint chain
+                                 away from the hinge. How far should we push it?
+        :param as_leg: bool - build as leg with proper names and knee bending forwards (not elbow bending backwards)
+        :param with_foot: bool - add a foot to the end of the leg
+        :param parent_joint: OutDataPointer or PyNode - Parent joint for this modules joint. If the value for this
+                             is None, the system will attempt to find the joint based on the given hook.
         """
         super().__init__(side=side, module_name=module_name, size=size, hook=hook, parent_joint=parent_joint)
         self.ik_hook = ik_hook

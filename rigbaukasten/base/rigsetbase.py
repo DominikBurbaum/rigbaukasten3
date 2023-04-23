@@ -5,11 +5,19 @@ import pymel.core as pm
 
 
 class RigSets(modulecor.RigModule):
+    """ Create rig sets (maya object sets) to group objects and use them in the build script.
+        The module will create a set with the module name. The user can then create other sets inside this set. Those
+        can be exported as rig data. The objects in the sets can be accessed using the functions in rigsetlib.
+    """
     def __init__(
             self,
             side='C',
             module_name='rigsets',
     ):
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        """
         super().__init__(side=side, module_name=module_name)
         self.load_rigdata(io_type='rigsets')
         parent_set_name = self.mk('parent_RIGSET')

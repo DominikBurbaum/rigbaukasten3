@@ -6,6 +6,7 @@ from rigbaukasten.library import controllib, curvelib, guidelib
 
 
 class AimCtl(modulecor.RigPuppetModule):
+    """ RigModule with two CTLs, one aiming at the other. """
     def __init__(
             self,
             side,
@@ -17,12 +18,14 @@ class AimCtl(modulecor.RigPuppetModule):
             parent_joint=None
     ):
         """
-
-        :param side:
-        :param module_name:
-        :param hook:
-        :param size:
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size for the guides and controls
+        :param hook: OutDataPointer or PyNode - What should the aiming CTL be attached to?
+        :param end_hook: OutDataPointer or PyNode - What should the aim target CTL be attached to?
         :param twist: Use aim CTL as up object instead of hook.
+        :param parent_joint: OutDataPointer or PyNode - Parent joint for this modules joint. If the value for this
+                             is None, the system will attempt to find the joint based on the given hook.
         """
         super().__init__(side=side, module_name=module_name, size=size, hook=hook, parent_joint=parent_joint)
         self.end_hook = end_hook

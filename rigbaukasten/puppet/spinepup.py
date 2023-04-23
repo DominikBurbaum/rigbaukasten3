@@ -6,6 +6,7 @@ from rigbaukasten.utils import attrutl
 
 
 class Spine(modulecor.RigPuppetModule):
+    """ Very basic spine module using fk/splineIk. """
     def __init__(
             self,
             side='C',
@@ -15,6 +16,15 @@ class Spine(modulecor.RigPuppetModule):
             hook=None,
             parent_joint=None
     ):
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size for the guides and controls
+        :param hook: OutDataPointer or PyNode - What should the module be attached to?
+        :param nr_of_joints: int - How many joints should be created?
+        :param parent_joint: OutDataPointer or PyNode - Parent joint for this modules joint. If the value for this
+                             is None, the system will attempt to find the joint based on the given hook.
+        """
         super().__init__(side=side, module_name=module_name, size=size, hook=hook, parent_joint=parent_joint)
         self.nr_of_joints = nr_of_joints
 

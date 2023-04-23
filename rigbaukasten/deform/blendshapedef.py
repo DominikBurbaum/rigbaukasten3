@@ -3,12 +3,18 @@ import pymel.core as pm
 
 
 class BlendShape(modulecor.RigModule):
+    """ Simple blendShape module. Lets you create sculpt targtes in maya and export them as rig data. """
     def __init__(
             self,
             side,
             module_name,
             geo='',
     ):
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param geo: PyNode - Geometry that should get the blendShape deformer assigned.
+        """
         super().__init__(side=side, module_name=module_name)
         self.geo = geo
         self.blendshape = None

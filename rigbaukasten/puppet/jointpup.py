@@ -6,6 +6,7 @@ from rigbaukasten.utils import attrutl, connectutl, mathutl
 
 
 class StretchyJoint(modulecor.RigPuppetModule):
+    """ A joint that 'stretches' (distance based scale) between the given hook and end_hook. """
     def __init__(
             self,
             side,
@@ -14,6 +15,13 @@ class StretchyJoint(modulecor.RigPuppetModule):
             end_hook=None,
             size=1
     ):
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size for the guides and joints
+        :param hook: OutDataPointer or PyNode - What should the origin/start joint be attached to?
+        :param end_hook: OutDataPointer or PyNode - What should the insertion/end joint be attached to?
+        """
         super().__init__(side=side, module_name=module_name)
         self.hook = hook
         self.end_hook = end_hook
@@ -218,6 +226,7 @@ class StretchyJoint(modulecor.RigPuppetModule):
 
 
 class SimpleHingeHelpers(modulecor.RigPuppetModule):
+    """ Deformation joints that are driven by the angle between hook and parent_hook. For elbows, knees, etc. """
     def __init__(
             self,
             side,
@@ -232,6 +241,20 @@ class SimpleHingeHelpers(modulecor.RigPuppetModule):
             side_volume=False,
             parent_joint=None
     ):
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size and position multiplier for the guides and joints
+        :param hook: OutDataPointer or PyNode - The hinge joint, e.g. elbow joint
+        :param parent_hook: OutDataPointer or PyNode - The parent joint, e.g. shoulder joint
+        :param down_axis: str - x, y, z, -x, -y or -z. Axis that goes down from the hinge, e.g. towards the wrist
+        :param out_axis: str - x, y, z, -x, -y or -z. Axis that goes out from the hinge, e.g. back to get a pointy elbow
+        :param limit: float - Default rotation value at which the joints should stop pushing further.
+        :param push_distance: float - Default distance the joints should be pushed at max.
+        :param side_volume: bool - Create two joints that push out sideways to mimic collision volume.
+        :param parent_joint: OutDataPointer or PyNode - Parent joint for this modules joint. If the value for this
+                             is None, the system will attempt to find the joint based on the given hook.
+        """
         super().__init__(side=side, module_name=module_name, parent_joint=parent_joint)
         self.hook = hook
         self.parent_hook = parent_hook
@@ -425,6 +448,10 @@ class SimpleHingeHelpers(modulecor.RigPuppetModule):
 
 
 class HingeSidePush(modulecor.RigPuppetModule):
+    """
+    Two joints that push out to the side of a hinge. Simple standalone version of SimpleHingeHelpers side_volume.
+    Primary use case is a cheek squash when opening the mouth.
+    """
     def __init__(
             self,
             side,
@@ -437,7 +464,14 @@ class HingeSidePush(modulecor.RigPuppetModule):
             push_distance=10,
     ):
         """
-        Two joints that push out to the side of a hinge. Simple standalone version of SimpleHingeHelpers side_volume.
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size and position multiplier for the guides and joints
+        :param hook: OutDataPointer or PyNode - The hinge joint, e.g. jaw joint
+        :param parent_hook: OutDataPointer or PyNode - The parent joint, e.g. head joint
+        :param hinge_axis: str - x, y, z, -x, -y or -z. rotation axis of the hinge
+        :param limit: float - Default rotation value at which the joints should stop pushing further.
+        :param push_distance: float - Default distance the joints should be pushed at max.
         """
         super().__init__(side=side, module_name=module_name)
         self.hook = hook
@@ -588,6 +622,13 @@ class HingeSidePush(modulecor.RigPuppetModule):
 
 
 class VolumePushers(modulecor.RigPuppetModule):
+    """
+    Volume push joints to support anatomical joints that rotate in all directions (e.g. spine).
+
+    Four joints will be created, towards the out directions (i.e. along all axes except the aim_axis). When the
+    driver rotates towards one of the joints, it will push out. On a spine this can be used to simulate belly
+    fat/ love handles.
+    """
     def __init__(
             self,
             side,
@@ -600,19 +641,14 @@ class VolumePushers(modulecor.RigPuppetModule):
             push_distance=10
     ):
         """
-        Volume push joints to support anatomical joints that rotate in all directions (e.g. spine).
-
-        Four joints will be created, towards the out directions (i.e. along all axes except the aim_axis). When the
-        driver rotates towards one of the joints, it will push out. On a spine this can be used to simulate belly
-        fat/ love handles.
-        :param side:
-        :param module_name:
-        :param hook:
-        :param parent_hook:
-        :param size:
-        :param aim_axis: str, one of [x, y, z, -x, -y or -z], aim axis of the driver joint (hook)
-        :param limit: float or int, maximum rotation that still causes a push
-        :param push_distance: float or int, how far should the joints push out
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size and position multiplier for the guides and joints
+        :param hook: OutDataPointer or PyNode - The hinge joint, e.g. jaw joint
+        :param parent_hook: OutDataPointer or PyNode - The parent joint, e.g. head joint
+        :param aim_axis: str - x, y, z, -x, -y or -z. aim axis of the driver joint (hook)
+        :param limit: float - Default rotation value at which the joints should stop pushing further.
+        :param push_distance: float - Default distance the joints should be pushed at max.
         """
         super().__init__(side=side, module_name=module_name)
         self.hook = hook

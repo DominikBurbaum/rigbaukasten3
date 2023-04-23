@@ -6,6 +6,7 @@ from rigbaukasten.library import controllib, guidelib, jointlib
 
 
 class SingleCtl(modulecor.RigPuppetModule):
+    """ Simple RigModule with a single CTL and a joint (optional). """
     def __init__(
             self,
             side,
@@ -16,6 +17,16 @@ class SingleCtl(modulecor.RigPuppetModule):
             lock_attrs=('sx', 'sy', 'sz', 'v'),
             parent_joint=None
     ):
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size for the guides and controls
+        :param hook: OutDataPointer or PyNode - What should the module be attached to?
+        :param with_joint: bool - create a joint for the CTL
+        :param lock_attrs: (str, ) - list of attributes that should be locked on the CTL
+        :param parent_joint: OutDataPointer or PyNode - Parent joint for this modules joint. If the value for this
+                             is None, the system will attempt to find the joint based on the given hook.
+        """
         super().__init__(side=side, module_name=module_name, size=size, hook=hook, parent_joint=parent_joint)
         self.lock_attrs = lock_attrs
         self.with_joint = with_joint
@@ -120,6 +131,7 @@ class SingleCtl(modulecor.RigPuppetModule):
 
 
 class SimpleFk(modulecor.RigPuppetModule):
+    """ A simple fk joint hierarchy with CTLs. """
     def __init__(
             self,
             side,
@@ -138,6 +150,24 @@ class SimpleFk(modulecor.RigPuppetModule):
             lock_attrs=('sx', 'sy', 'sz', 'v'),
             parent_joint=None,
     ):
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size for the guides and controls
+        :param hook: OutDataPointer or PyNode - What should the module be attached to?
+        :param nr_of_joints: int - How many joints should be created?
+        :param joint_labels: (str, ) - List of names for each joint. None will numerate the joints starting at 00.
+        :param aim: vector - Axis that aims at the next joint in the hierarchy.
+        :param up: vector - up axis for the joints
+        :param world_up: vector - world up axis for the joints
+        :param world_up_type: See guidelib for options
+        :param flip_right_vectors: bool - Flip the given aim and up vectors if side is R. Useful in side loops.
+        :param tip_joint_aim: bool - Aim the tip joint based on its parent. If False the tip guide can be freely rotated
+        :param tip_has_ctl: bool - Create or skip the CTL for the tip joint.
+        :param lock_attrs: (str, ) - list of attributes that should be locked on the CTL
+        :param parent_joint: OutDataPointer or PyNode - Parent joint for this modules joint. If the value for this
+                             is None, the system will attempt to find the joint based on the given hook.
+        """
         super().__init__(side=side, module_name=module_name, size=size, hook=hook, parent_joint=parent_joint)
         self.nr_of_joints = nr_of_joints
         self.joint_labels = joint_labels or [f'{i:02d}' for i in range(self.nr_of_joints)]

@@ -7,6 +7,7 @@ from rigbaukasten.utils.typesutl import Jnt
 
 
 class SimpleSkin(modulecor.RigModule):
+    """ A simple skinCluster with given joints and geo. """
     def __init__(
             self,
             side,
@@ -14,7 +15,14 @@ class SimpleSkin(modulecor.RigModule):
             geo=(),
             joints=(),
     ):
-        """ A simple skinCluster with given joints and geo. """
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param geo: (PyNode, ) - Geo(s) that should get the skinCluster deformer assigned. If a group is given all
+                    child nodes will be used.
+        :param joints: (PyNode, ) or OutDataPointer(s) - Default joints for the skinClusters. More can of course be
+                        added later in maya using 'Skin - Edit Influences - Add Influence'.
+        """
         super().__init__(side=side, module_name=module_name)
         self.geo = pythonutl.force_list(geo)
         self.joints = joints if isinstance(joints, (list, tuple)) else [joints]
@@ -32,7 +40,7 @@ class SimpleSkin(modulecor.RigModule):
             all_shapes = pm.listRelatives(geo, shapes=True, ad=True)
             for shape in all_shapes:
                 trn = pm.listRelatives(shape, p=True)[0]
-                if not trn in new_geo:
+                if trn not in new_geo:
                     new_geo.append(trn)
         self.geo = new_geo
 
@@ -63,13 +71,19 @@ class SimpleSkin(modulecor.RigModule):
 
 
 class SkinSet(SimpleSkin):
+    """ Same as SimpleSkin, but geo is passed in via rig sets instead of names. """
     def __init__(
             self,
             side,
             module_name,
             joints=(),
     ):
-        """ Same as SimpleSkin, but geo is passed in via rig sets instead of names. """
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param joints: (PyNode, ) or OutDataPointer(s) - Default joints for the skinClusters. More can of course be
+                        added later in maya using 'Skin - Edit Influences - Add Influence'.
+        """
         super().__init__(side=side, module_name=module_name, joints=joints)
 
         self.load_rigdata(io_type='rigsets', recursive=False)
@@ -100,12 +114,21 @@ class SkinSet(SimpleSkin):
 
 
 class TransferredSkin(modulecor.RigModule):
+    """
+    Create skinClusters based on already existing ones. E.g. to transfer skinning from lowRes to hiRes meshes.
+    Specify source and target meshes by using sets with matching names and a 'Src_RIGSET' / 'Tgt_RIGSET' suffix.
+    """
     def __init__(
             self,
             side='C',
             module_name='transferredSkin',
             uv_based=False
     ):
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param uv_based: bool - Transfer weights based on UVs. If False, closest point will be used.
+        """
         super().__init__(side=side, module_name=module_name)
         self.side = side
         self.module_name = module_name
@@ -176,22 +199,6 @@ class TransferredSkin(modulecor.RigModule):
         """
         Now that the source skinClusters should have their weights, update the target influences and copy weights.
         """
-        # all_sets = rigsetlib.get_all_members(self.parent_set)
-        # src_sets, tgt_sets, invalid = [], [], []
-        # for s in all_sets:
-        #     if s.name().endswith('Src_RIGSET'):
-        #         src_sets.append(s)
-        #     elif s.name().endswith('Tgt_RIGSET'):
-        #         tgt_sets.append(s)
-        #     else:
-        #         invalid.append(s)
-        # if invalid:
-        #     raise errorutl.RbkInvalidName(
-        #         f'Invalid name for skin transfer sets, must end with "Src_RIGSET" or "Tgt_RIGSET". Got: {invalid}'
-        #     )
-        # src_sets.sort()
-        # tgt_sets.sort()
-
         for src_set, tgt_set in zip(self.src_sets, self.tgt_sets):
             src = rigsetlib.get_all_members(src_set)
             tgt = rigsetlib.get_all_members(tgt_set)
