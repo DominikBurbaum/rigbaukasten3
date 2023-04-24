@@ -237,45 +237,45 @@ def mirror_transforms_menu():
     pm.menuItem(label='Pos Only', c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=False))
     pm.menuItem(divider=True, p='Rigbaukasten_mirror_transforms')
     pm.menuItem(
-        label='Pos/Rot, Keep All',
-        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, keep_axis='all')
+        label='Pos/Rot, Flip All',
+        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, flip_axis='all')
     )
     pm.menuItem(
-        label='Pos/Rot, Keep X',
-        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, keep_axis='x')
+        label='Pos/Rot, Flip X',
+        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, flip_axis='x')
     )
     pm.menuItem(
-        label='Pos/Rot, Keep Y',
-        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, keep_axis='y')
+        label='Pos/Rot, Flip Y',
+        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, flip_axis='y')
     )
     pm.menuItem(
-        label='Pos/Rot, Keep Z',
-        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, keep_axis='z')
+        label='Pos/Rot, Flip Z',
+        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, flip_axis='z')
     )
     pm.menuItem(
-        label='Pos/Rot, Keep None',
-        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, keep_axis=None)
+        label='Pos/Rot, Flip None',
+        c=lambda _: mirrorutl.world_mirror(None, pos=True, rot=True, flip_axis=None)
     )
     pm.menuItem(divider=True, p='Rigbaukasten_mirror_transforms')
     pm.menuItem(
-        label='Rot Only, Keep All',
-        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, keep_axis='all')
+        label='Rot Only, Flip All',
+        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, flip_axis='all')
     )
     pm.menuItem(
-        label='Rot Only, Keep X',
-        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, keep_axis='x')
+        label='Rot Only, Flip X',
+        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, flip_axis='x')
     )
     pm.menuItem(
-        label='Rot Only, Keep Y',
-        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, keep_axis='y')
+        label='Rot Only, Flip Y',
+        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, flip_axis='y')
     )
     pm.menuItem(
-        label='Rot Only, Keep Z',
-        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, keep_axis='z')
+        label='Rot Only, Flip Z',
+        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, flip_axis='z')
     )
     pm.menuItem(
-        label='Rot Only, Keep None',
-        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, keep_axis=None)
+        label='Rot Only, Flip None',
+        c=lambda _: mirrorutl.world_mirror(None, pos=False, rot=True, flip_axis=None)
     )
 
 

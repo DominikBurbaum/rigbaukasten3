@@ -25,11 +25,11 @@ def world_mirror_pos(transforms, mirror_axis='x'):
         other.setTranslation(pos, 'world')
 
 
-def world_mirror_rot(transforms, mirror_axis='x', keep_axis='y'):
-    if mirror_axis.lower() not in 'xyz':
+def world_mirror_rot(transforms, mirror_axis='x', flip_axis='y'):
+    if mirror_axis not in ['x', 'y', 'z', 'X', 'Y', 'Z']:
         raise errorutl.RbkInvalidKeywordArgument(f'mirror_axis {mirror_axis} is invalid, need one of x, y, z')
-    if keep_axis.lower() not in [None, 'none', 'x', 'y', 'z', 'all']:
-        raise errorutl.RbkInvalidKeywordArgument(f"keep_axis {mirror_axis} is invalid, need one of None, x, y, z, all")
+    if flip_axis not in [None, 'none', 'x', 'y', 'z', 'X', 'Y', 'Z', 'all']:
+        raise errorutl.RbkInvalidKeywordArgument(f"flip_axis {mirror_axis} is invalid, need one of None, x, y, z, all")
     transforms = pythonutl.force_list(transforms)
     for trn in transforms:
         other = get_mirror_transform(trn)
@@ -45,54 +45,30 @@ def world_mirror_rot(transforms, mirror_axis='x', keep_axis='y'):
         y_vec[index] *= -1
         z_vec[index] *= -1
 
-        if keep_axis.lower() in ['y', 'z', 'all']:
+        if flip_axis and flip_axis.lower() in ['x', 'all']:
             x_vec[0] *= -1
             x_vec[1] *= -1
             x_vec[2] *= -1
 
-        if keep_axis.lower() in ['x', 'z', 'all']:
+        if flip_axis and flip_axis.lower() in ['y', 'all']:
             y_vec[0] *= -1
             y_vec[1] *= -1
             y_vec[2] *= -1
 
-        if keep_axis.lower() in ['x', 'y', 'all']:
+        if flip_axis and flip_axis.lower() in ['z', 'all']:
             z_vec[0] *= -1
             z_vec[1] *= -1
             z_vec[2] *= -1
-
-        # if keep_axis == 'x':
-        #     y_vec[0] *= -1
-        #     y_vec[1] *= -1
-        #     y_vec[2] *= -1
-        #     z_vec[0] *= -1
-        #     z_vec[1] *= -1
-        #     z_vec[2] *= -1
-        #
-        # if keep_axis == 'y':
-        #     x_vec[0] *= -1
-        #     x_vec[1] *= -1
-        #     x_vec[2] *= -1
-        #     z_vec[0] *= -1
-        #     z_vec[1] *= -1
-        #     z_vec[2] *= -1
-        #
-        # if keep_axis == 'z':
-        #     x_vec[0] *= -1
-        #     x_vec[1] *= -1
-        #     x_vec[2] *= -1
-        #     y_vec[0] *= -1
-        #     y_vec[1] *= -1
-        #     y_vec[2] *= -1
 
         mirror_mat = pm.datatypes.Matrix(x_vec, y_vec, z_vec, t_vec)
 
         other.setTransformation(mirror_mat)
 
 
-def world_mirror(trns, pos=True, rot=True, mirror_axis='x', keep_axis='all'):
+def world_mirror(trns, pos=True, rot=True, mirror_axis='x', flip_axis='all'):
     if not trns:
         trns = pm.ls(sl=True, type='transform')
     if pos:
         world_mirror_pos(transforms=trns, mirror_axis=mirror_axis)
     if rot:
-        world_mirror_rot(transforms=trns, mirror_axis=mirror_axis, keep_axis=keep_axis)
+        world_mirror_rot(transforms=trns, mirror_axis=mirror_axis, flip_axis=flip_axis)
