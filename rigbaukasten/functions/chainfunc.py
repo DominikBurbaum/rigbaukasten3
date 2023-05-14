@@ -70,7 +70,7 @@ def simple_spline_ik_from_joints(joints, label='Ik', size=1, fwd_axis='x', up_ax
 
     # ctls
     ctls = []
-    for j in (sj, mj, ee):
+    for j in (joints[0], mj, ee):
         side, module_name, jnt_label, suffix = j.name().split('_')
         if 'Puppet' in jnt_label:
             jnt_label = jnt_label.replace('Puppet', '')
