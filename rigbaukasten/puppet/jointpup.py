@@ -776,3 +776,196 @@ class VolumePushers(modulecor.RigPuppetModule):
         self.connect_puppet_joints()
         self.connect_to_hooks()
         self.cleanup_joints_side_aware()
+
+
+class ShearHinge(modulecor.RigPuppetModule):
+    """ Deformation joints that shear around a corner, to maintain volume for wrist, fingers, etc. """
+    def __init__(
+            self,
+            side,
+            module_name,
+            hook=None,
+            parent_hook=None,
+            size=1,
+            aim_axis='x',
+            shear_clip_start=2,
+            shear_clip_end=3,
+            push_distance=10,
+            parent_joint=None
+    ):
+        """
+        :param side: str - C, L or R
+        :param module_name: str - unique name for the module
+        :param size: float - default size and position multiplier for the guides and joints
+        :param hook: OutDataPointer or PyNode - The hinge joint, e.g. elbow joint
+        :param parent_hook: OutDataPointer or PyNode - The parent joint, e.g. shoulder joint
+        :param aim_axis: str - x, y, z, -x, -y or -z. Aim axis of the joint chain
+        :param shear_clip_start: float - If shear values get too big, it usually causes too extreme deformations.
+                                         Thus, we create a soft clip setup. This is the start value for the soft clip.
+                                         Below this value the clip has no effect.
+        :param shear_clip_end: float - End value for the soft clip setup, no values above this are possible.
+        :param push_distance: float - Default distance the joints should be towards the inside of the hinge.
+        :param parent_joint: OutDataPointer or PyNode - Parent joint for this modules joint. If the value for this
+                             is None, the system will attempt to find the joint based on the given hook.
+        """
+        super().__init__(side=side, module_name=module_name, parent_joint=parent_joint)
+        self.hook = hook
+        self.parent_hook = parent_hook
+        self.size = size
+        self.aim_axis = aim_axis
+        self.shear_clip_start = shear_clip_start
+        self.shear_clip_end = shear_clip_end
+        self.push_distance = push_distance
+
+        self.upper_hook_grp = None
+        self.lower_hook_grp = None
+        self.upper_jnt_grp = None
+        self.lower_jnt_grp = None
+        self.upper_jnt = None
+        self.lower_jnt = None
+        self.avg_trn = None
+        self.push_trn = None
+        self.upper_pup_jnt = None
+        self.lower_pup_jnt = None
+        self.clipped_shear_output_plugs = {}
+
+    def create_jnts(self):
+        """
+        Create the main skin joints.
+        :TO DO: can we put the joints in the correct positions? Or at least better positions than all in one spot?
+        """
+        parent = self.get_asset_root_module().skel_grp
+        self.upper_jnt = pm.createNode('joint', n=self.mk('upperShear_JNT'), p=parent)
+        self.lower_jnt = pm.createNode('joint', n=self.mk('lowerShear_JNT'), p=parent)
+
+        self.joints = [self.upper_jnt, self.lower_jnt]
+
+        for jnt in self.joints:
+            jnt.radius.set(self.size)
+
+    def connect_to_main_skeleton(self):
+        """ Do the normal connect_to_main_skeleton(), then move the joints to their parent.
+            This doesn't have any effect on the rig, because the positions will change again when the pose readers
+            are applied. All it does is avoid bones form being drawn frm the hinge to the origin.
+            Second joint needs to be parented manually, because we have two floating joints and not a chain here.
+        """
+        super().connect_to_main_skeleton()
+        self.joints[1].setParent(self.joints[0].getParent())
+        for jnt in self.joints:
+            jnt.t.set(0, 0, 0)
+            jnt.r.set(0, 0, 0)
+
+    def create_puppet_jnts(self):
+        self.upper_hook_grp = pm.group(em=True, n=self.mk('upperHook_TRN'), p=self.in_hooks_grp)
+        self.lower_hook_grp = pm.group(em=True, n=self.mk('lowerHook_TRN'), p=self.in_hooks_grp)
+        self.avg_trn = pm.group(em=True, n=self.mk('average_TRN'), p=self.lower_hook_grp)
+        self.push_trn = pm.group(em=True, n=self.mk('push_TRN'), p=self.avg_trn)
+        self.upper_jnt_grp = pm.group(em=True, n=self.mk('upperJoint_GRP'), p=self.push_trn)
+        self.upper_pup_jnt = pm.createNode('joint', n=self.mk('upperPuppet_JNT'), p=self.upper_jnt_grp)
+        self.lower_jnt_grp = pm.group(em=True, n=self.mk('lowerJoint_GRP'), p=self.push_trn)
+        self.lower_pup_jnt = pm.createNode('joint', n=self.mk('ulowrPuppet_JNT'), p=self.lower_jnt_grp)
+
+        self.puppet_joints = [self.upper_pup_jnt, self.lower_pup_jnt]
+
+        aim_vec = [a * self.size for a in mathutl.vector_from_axis(self.aim_axis)]
+        for i, ax in enumerate('xyz'):
+            self.upper_pup_jnt.attr(f't{ax}').set(aim_vec[i] * -1)
+            self.lower_pup_jnt.attr(f't{ax}').set(aim_vec[i])
+        for jnt in self.puppet_joints:
+            jnt.radius.set(self.size * 0.5)
+
+    def compute_shear(self):
+        for i, grp in enumerate((self.upper_hook_grp, self.lower_hook_grp)):
+            jnt = self.puppet_joints[i]
+            matrix_vectors = []
+            for ax in 'xyz':
+                driver = grp if ax == self.aim_axis[-1].lower() else self.avg_trn
+                vec_from_matrix = connectutl.create_node(
+                    'vectorProduct',
+                    matrix=driver.wm[0],
+                    operation=3,
+                    input1=mathutl.vector_from_axis(ax),
+                    n=self.mk(f'{ax}VectorFromWorldMatrix_VEC')
+                )
+                matrix_vectors.append(vec_from_matrix)
+            shear_mat = connectutl.create_node(
+                'fourByFourMatrix',
+                n=self.mk("shear_MAT"),
+                in00=matrix_vectors[0].outputX,
+                in01=matrix_vectors[0].outputY,
+                in02=matrix_vectors[0].outputZ,
+                in10=matrix_vectors[1].outputX,
+                in11=matrix_vectors[1].outputY,
+                in12=matrix_vectors[1].outputZ,
+                in20=matrix_vectors[2].outputX,
+                in21=matrix_vectors[2].outputY,
+                in22=matrix_vectors[2].outputZ,
+            )
+            shear_dcm = connectutl.create_node(
+                'decomposeMatrix',
+                n=self.mk("shear_DCM"),
+                inputMatrix=shear_mat.output
+            )
+            for ax, shear in zip('XYZ', ('shearXY', 'shearXZ', 'shearYZ')):
+                plug = connectutl.soft_clip_pos_neg(
+                    input_plug=shear_dcm.attr(f'outputShear{ax}'),
+                    clip_start=self.shear_clip_start,
+                    clip_end=self.shear_clip_end,
+                    output_plug=jnt.attr(shear),
+                    attrs_holder=self.grp,
+                    module_key=self.mk(''),
+                    label=f'lowerSoftClip{ax}' if i else f'upperSoftCLip{ax}'
+                )
+                self.clipped_shear_output_plugs[ax] = plug  # will be overwritten in the 2nd loop but that's ok
+
+    def push_in(self):
+        for ax, plug in self.clipped_shear_output_plugs.items():
+            push_index = ('XYZ'.index(ax) + 1) % 3
+            push_ax = 'XYZ'[push_index]
+            if push_ax == self.aim_axis[-1].upper():
+                continue
+            connectutl.driven_keys(
+                driver=plug,
+                driven=self.push_trn.attr(f'translate{push_ax}'),
+                v=(-self.push_distance, 0, self.push_distance),
+                dv=(-self.shear_clip_end, 0, self.shear_clip_end),
+            )
+        self.publish_nodes['drivenKeys'].append(self.push_trn)
+
+    def connect_to_hooks(self):
+        hook = self.get_hook(self.hook)
+        parent_hook = self.get_hook(self.parent_hook)
+
+        pm.pointConstraint(hook, self.avg_trn)
+        avg_orc = pm.orientConstraint(hook, parent_hook, self.avg_trn)
+        avg_orc.interpType.set(2)
+        pm.orientConstraint(parent_hook, self.upper_hook_grp)
+        pm.orientConstraint(hook, self.lower_hook_grp)
+
+        pm.orientConstraint(self.upper_hook_grp, self.upper_jnt_grp)
+        pm.orientConstraint(self.lower_hook_grp, self.lower_jnt_grp)
+
+    def skeleton_build_pre(self):
+        super().skeleton_build_pre()
+        self.create_grps()
+
+    def skeleton_build(self):
+        super().skeleton_build()
+        self.create_jnts()
+        self.store_output_data(jnts=self.joints)
+
+    def skeleton_connect(self):
+        super().skeleton_connect()
+        self.connect_to_main_skeleton()
+
+    def puppet_build(self):
+        super().puppet_build()
+        self.create_puppet_jnts()
+        self.compute_shear()
+        self.push_in()
+        self.load_rigdata(io_type='drivenKeys', recursive=False)
+
+    def puppet_connect(self):
+        super().puppet_connect()
+        self.connect_puppet_joints()
+        self.connect_to_hooks()
