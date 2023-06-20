@@ -363,6 +363,7 @@ class SimpleHingeHelpers(modulecor.RigPuppetModule):
             v=(out_pos_start[out_index], out_pos_end[out_index]),
             dv=(0, self.limit)
         )
+        self.publish_nodes['drivenKeys'].append(self.push_out_pup_jnt)
         for jnt in self.side_volume_pup_jnts:
             inv = 1 if jnt.endswith('sideVolume01Puppet_JNT') else -1
             connectutl.driven_keys(
@@ -371,6 +372,7 @@ class SimpleHingeHelpers(modulecor.RigPuppetModule):
                 v=(self.size * inv, self.push_distance * inv * 0.5),
                 dv=(self.limit * 0.5, self.limit)
             )
+            self.publish_nodes['drivenKeys'].append(jnt)
 
         self.push_down_pup_jnt.attr(f't{self.out_axis[-1]}').set(out_pos_start[out_index] * -1)
         self.push_up_pup_jnt.attr(f't{self.out_axis[-1]}').set(out_pos_start[out_index] * -1)
@@ -391,6 +393,7 @@ class SimpleHingeHelpers(modulecor.RigPuppetModule):
             v=(down_pos_start[down_index] * -1, down_pos_end[down_index] * -1),
             dv=(0, self.limit)
         )
+        self.publish_nodes['drivenKeys'] += [self.push_down_pup_jnt, self.push_up_jnt]
 
     def connect_to_hooks(self):
         hook = self.get_hook(self.hook)
@@ -448,6 +451,7 @@ class SimpleHingeHelpers(modulecor.RigPuppetModule):
         self.connect_puppet_joints()
         self.connect_to_hooks()
         self.cleanup_joints_side_aware()
+        self.load_rigdata(io_type='drivenKeys', recursive=False)
 
 
 class HingeSidePush(modulecor.RigPuppetModule):
@@ -565,6 +569,7 @@ class HingeSidePush(modulecor.RigPuppetModule):
             v=(-self.size, -(self.push_distance + self.size)),
             dv=(0, self.limit)
         )
+        self.publish_nodes['drivenKeys'] += [self.pos_pup_jnt, self.neg_pup_jnt]
 
     def connect_to_hooks(self):
         hook = self.get_hook(self.hook)
@@ -622,6 +627,7 @@ class HingeSidePush(modulecor.RigPuppetModule):
         self.connect_puppet_joints()
         self.connect_to_hooks()
         self.cleanup_joints_side_aware()
+        self.load_rigdata(io_type='drivenKeys', recursive=False)
 
 
 class VolumePushers(modulecor.RigPuppetModule):
@@ -726,6 +732,7 @@ class VolumePushers(modulecor.RigPuppetModule):
                     v=(start, end),
                     dv=(0, self.limit * direction * inv)
                 )
+                self.publish_nodes['drivenKeys'].append(jnt)
 
     def connect_to_hooks(self):
         hook = self.get_hook(self.hook)
@@ -776,6 +783,7 @@ class VolumePushers(modulecor.RigPuppetModule):
         self.connect_puppet_joints()
         self.connect_to_hooks()
         self.cleanup_joints_side_aware()
+        self.load_rigdata(io_type='drivenKeys', recursive=False)
 
 
 class ShearHinge(modulecor.RigPuppetModule):
