@@ -39,6 +39,7 @@ class Ribcage(modulecor.RigModule):
             module_name='sternum',
             hook=self.lower_breathing_trn,
             end_hook=self.upper_breathing_trn,
+            parent_joint=lower_chest_hook
         ))
         shoulder_hook = {'L': left_shoulder_hook, 'R': right_shoulder_hook}
         clavicle_hook = {'L': left_clavicle_hook, 'R': right_clavicle_hook}
@@ -48,25 +49,29 @@ class Ribcage(modulecor.RigModule):
                 side=s,
                 module_name='clavicleBone',
                 hook=['C_sternum', 0],
-                end_hook=clavicle_hook[s]
+                end_hook=clavicle_hook[s],
+                parent_joint=upper_chest_hook
             ))
             self.add_module(jointpup.StretchyJoint(
                 side=s,
                 module_name='pectoralisClavicular',
                 hook=[f'{s}_clavicleBone', 0],
                 end_hook=shoulder_hook[s],
+                parent_joint=upper_chest_hook
             ))
             self.add_module(jointpup.StretchyJoint(
                 side=s,
                 module_name='pectoralisSternal',
                 hook=['C_sternum', 0],
                 end_hook=shoulder_hook[s],
+                parent_joint=lower_chest_hook
             ))
             self.add_module(jointpup.StretchyJoint(
                 side=s,
                 module_name='pectoralisAbdominal',
                 hook=outer_breathing_hook[s],
                 end_hook=shoulder_hook[s],
+                parent_joint=lower_chest_hook
             ))
 
     def create_breathing_hooks(self):
