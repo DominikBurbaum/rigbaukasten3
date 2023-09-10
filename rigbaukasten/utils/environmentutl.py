@@ -60,7 +60,6 @@ class Environment(AbstractEnvironment):
 
         self._project_path = None
         self._asset_name = None
-        self._asset_type = None
 
     @property
     def asset_name(self):
@@ -71,16 +70,6 @@ class Environment(AbstractEnvironment):
     @asset_name.setter
     def asset_name(self, name):
         self._asset_name = name
-
-    @property
-    def asset_type(self):
-        if self._asset_type is None:
-            raise errorutl.RbkEnvironmentError('Cannot get asset type, set environment first.')
-        return self._asset_type
-
-    @asset_type.setter
-    def asset_type(self, typ):
-        self._asset_type = typ
 
     @property
     def project_path(self):
@@ -103,22 +92,22 @@ class Environment(AbstractEnvironment):
         return self.asset_name
 
     def get_rigdata_path(self):
-        return os.path.join(self.project_path, self.asset_type, self.asset_name, 'rigdata')
+        return os.path.join(self.project_path, self.asset_name, '03_Core', '04_Rig', 'RigData')
 
     def get_model_path(self, version=None):
-        models_dir = os.path.join(self.project_path, self.asset_type, self.asset_name, 'model')
+        models_dir = os.path.join(self.project_path, self.asset_name, '03_Core', '02_Publish')
         if version:
-            file_name = f'{self.asset_name}_model_v{version:03d}.ma'
+            file_name = f'{self.asset_name}_mdl_{version:03d}.mb'
             return os.path.join(models_dir, file_name)
         else:
-            file_name = f'{self.asset_name}_model_v*.ma'
+            file_name = f'{self.asset_name}_mdl_*.mb'
             glob_path = os.path.join(models_dir, file_name)
             versions = glob.glob(glob_path)
             versions.sort()
             return versions[-1]
 
     def get_rig_builds_path(self):
-        project_scripts_path = os.path.join(self.project_path, 'scripts')
+        project_scripts_path = os.path.join(self.project_path, self.asset_name, '03_Core', '04_Rig', 'Scripts')
         rig_builds_path = os.path.join(project_scripts_path, 'rig_builds')
         if not os.path.exists(rig_builds_path):
             os.makedirs(rig_builds_path)
@@ -129,9 +118,9 @@ class Environment(AbstractEnvironment):
     def set(self, *args, **kwargs):
         x = ProjectSetterUi()
         if x.exec_():
-            self._project_path, self._asset_type, self._asset_name = x.results()
+            self._project_path, client, self._asset_name = x.results()
 
-            print(f'Now working on {self.asset_type}/{self.asset_name} in {self.project_path}')
+            print(f'Now working on {self.asset_name} in {self.project_path}')
 
 
 class ProjectSetterUi(pysideutl.MayaDialog):
@@ -159,7 +148,8 @@ class ProjectSetterUi(pysideutl.MayaDialog):
         path_widget.setLayout(path_lay)
         self.path_lne = QtWidgets.QLineEdit()
         self.path_lne.setPlaceholderText('/my/fancy/project')
-        self.path_lne.setText(pm.workspace(query=1, rootDirectory=1).replace('/', os.sep).replace('\\', os.sep))
+        # self.path_lne.setText(pm.workspace(query=1, rootDirectory=1).replace('/', os.sep).replace('\\', os.sep))
+        self.path_lne.setText(os.path.join('U', '03_Library', '01_Avatars', 'bodys'))
         path_lay.addWidget(self.path_lne)
         path_btn = QtWidgets.QPushButton('...')
         path_btn.setFixedWidth(30)
@@ -167,11 +157,11 @@ class ProjectSetterUi(pysideutl.MayaDialog):
         path_lay.addWidget(path_btn)
         base_lay.addWidget(path_widget)
 
-        asset_type_lbl = QtWidgets.QLabel('Asset Type:')
-        base_lay.addWidget(asset_type_lbl)
+        client_lbl = QtWidgets.QLabel('Client:')
+        base_lay.addWidget(client_lbl)
 
-        self.asset_type_cmb = QtWidgets.QComboBox()
-        base_lay.addWidget(self.asset_type_cmb)
+        self.client_cmb = QtWidgets.QComboBox()
+        base_lay.addWidget(self.client_cmb)
 
         asset_lbl = QtWidgets.QLabel('Asset Name:')
         base_lay.addWidget(asset_lbl)
@@ -179,37 +169,39 @@ class ProjectSetterUi(pysideutl.MayaDialog):
         self.asset_cmb = QtWidgets.QComboBox()
         base_lay.addWidget(self.asset_cmb)
 
-        self.update_asset_type_cmb()
+        self.update_client_cmb()
         self.update_asset_cmb()
-        self.asset_type_cmb.currentIndexChanged.connect(self.update_asset_cmb)
+        self.client_cmb.currentIndexChanged.connect(self.update_asset_cmb)
 
         btn = QtWidgets.QPushButton('OK')
         btn.clicked.connect(self.accept)
         base_lay.addWidget(btn)
 
     def results(self):
-        project_path = self.path_lne.text().strip()
-        asset_type = self.asset_type_cmb.currentText().strip()
+        project_path = os.path.join(self.path_lne.text().strip(), self.client_cmb.currentText().strip())
+        client = self.client_cmb.currentText().strip()
         asset_name = self.asset_cmb.currentText().strip()
-        return project_path, asset_type, asset_name
+        return project_path, client, asset_name
 
     def set_path(self):
         proj_path = pm.fileDialog2(fm=2, cap='Choose Project', okc='OK')[0].replace('/', os.sep).replace('\\', os.sep)
         self.path_lne.setText(proj_path)
-        self.update_asset_type_cmb()
+        self.update_client_cmb()
         self.update_asset_cmb()
 
-    def update_asset_type_cmb(self):
-        self.asset_type_cmb.clear()
-        folder = self.path_lne.text()
+    def update_client_cmb(self):
+        self.client_cmb.clear()
+        folder = self.path_lne.text().strip()
         if os.path.exists(folder):
-            types = [a for a in os.listdir(folder) if a in ('characters', 'vehicles', 'props')]
-            for typ in types:
-                self.asset_type_cmb.addItem(typ)
+            clients = [a for a in os.listdir(folder) if '.' not in a]
+            for client in clients:
+                self.client_cmb.addItem(client)
+        else:
+            print('bodies not found')
 
     def update_asset_cmb(self):
         self.asset_cmb.clear()
-        folder = os.path.join(self.path_lne.text(), self.asset_type_cmb.currentText().strip())
+        folder = os.path.join(self.path_lne.text().strip(), self.client_cmb.currentText().strip())
         if os.path.exists(folder):
             assets = [a for a in os.listdir(folder) if '.' not in a]
             for asset in assets:
