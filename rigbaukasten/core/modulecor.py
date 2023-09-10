@@ -413,6 +413,8 @@ class RigPuppetModule(RigModule):
 
     def connect_to_main_skeleton(self):
         skeleton_parent = self.parent_joint or self.get_joint_from_hook(self.hook)
+        if isinstance(skeleton_parent, Jnt):  # Jnt('C_spine', 0)
+            skeleton_parent = self.get_output_data(skeleton_parent)
         if skeleton_parent:
             self.joints[0].setParent(skeleton_parent)
 

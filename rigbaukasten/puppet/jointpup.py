@@ -13,7 +13,8 @@ class StretchyJoint(modulecor.RigPuppetModule):
             module_name,
             hook=None,
             end_hook=None,
-            size=1
+            size=1,
+            parent_joint=None
     ):
         """
         :param side: str - C, L or R
@@ -22,10 +23,8 @@ class StretchyJoint(modulecor.RigPuppetModule):
         :param hook: OutDataPointer or PyNode - What should the origin/start joint be attached to?
         :param end_hook: OutDataPointer or PyNode - What should the insertion/end joint be attached to?
         """
-        super().__init__(side=side, module_name=module_name)
-        self.hook = hook
+        super().__init__(side=side, module_name=module_name, size=size, hook=hook, parent_joint=parent_joint)
         self.end_hook = end_hook
-        self.size = size
 
         self.position_trns = {}
         self.start_trn = None
