@@ -121,6 +121,7 @@ def apply_weights_from_file(path, skn):
     pm.select(skn.getGeometry()[0].vtx[0])
     skn.smoothWeights(0)
     pm.select(cl=True)
+    skn.forceNormalizeWeights()
 
 
 def get_skin(obj):
