@@ -149,7 +149,9 @@ class ProjectSetterUi(pysideutl.MayaDialog):
         self.path_lne = QtWidgets.QLineEdit()
         self.path_lne.setPlaceholderText('/my/fancy/project')
         # self.path_lne.setText(pm.workspace(query=1, rootDirectory=1).replace('/', os.sep).replace('\\', os.sep))
-        self.path_lne.setText(os.path.join('U', '03_Library', '01_Avatars', 'bodys'))
+        drive = f'U:{os.sep}' if sys.platform.startswith('win') else 'U'
+        self.path_lne.setText(os.path.join(drive, '03_Library', '01_Avatars', 'bodys'))
+        self.path_lne.textChanged.connect(self.path_lne_changed)
         path_lay.addWidget(self.path_lne)
         path_btn = QtWidgets.QPushButton('...')
         path_btn.setFixedWidth(30)
@@ -186,6 +188,9 @@ class ProjectSetterUi(pysideutl.MayaDialog):
     def set_path(self):
         proj_path = pm.fileDialog2(fm=2, cap='Choose Project', okc='OK')[0].replace('/', os.sep).replace('\\', os.sep)
         self.path_lne.setText(proj_path)
+        self.path_lne_changed()
+
+    def path_lne_changed(self):
         self.update_client_cmb()
         self.update_asset_cmb()
 
