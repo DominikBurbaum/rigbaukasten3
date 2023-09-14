@@ -3,6 +3,5 @@
 *.DS_Store
 rigbaukasten/resources/guide_meshes/guideMeshVerceFemale/*
 rigbaukasten/resources/guide_meshes/guideMeshVerceMale/*
-rigbaukasten/resources/rig_build_templates/*verce*
 /rigbaukasten/resources/guide_meshes/guideMeshVerceAdvancedFemale/*
 /rigbaukasten/resources/guide_meshes/guideMeshVerceAdvancedMale/*
