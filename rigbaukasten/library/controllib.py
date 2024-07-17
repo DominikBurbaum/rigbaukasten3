@@ -41,7 +41,8 @@ class AnimCtl(object):
     def create_ctl(self):
         self.trn = create_curve(shape=self.ctl_shape, name=f'{self.side}_{self.module_name}_{self.label}_{self.suffix}')
         self.shp = self.trn.getShape()
-        self.grp = pm.group(self.trn, n=f'{self.side}_{self.module_name}_{self.label}Offset_GRP')
+        self.grp = pm.group(em=True, n=f'{self.side}_{self.module_name}_{self.label}Offset_GRP')
+        self.trn.setParent(self.grp)  # important to create group empty at first, otherwise pivot might be off center
 
     def add_ctl_shape(self, shape, label, size=None, color=None):
         """ Add another shape node the the CTL.
