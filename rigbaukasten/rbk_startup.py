@@ -11,6 +11,7 @@ from rigbaukasten.core import modulecor
 from rigbaukasten.library import controllib, rigsetlib
 from rigbaukasten.pipeline import reloadpip, newrigbuildpip
 from rigbaukasten.utils import mathutl, errorutl, mirrorutl, fileutl, pysideutl
+from rigbaukasten.tools import fkiksnaptool
 
 
 def rigbaukasten_menu():
@@ -40,6 +41,8 @@ def rigbaukasten_menu():
     pm.menuItem(label='Mirror CTL', c=mirror_ctl_cmd, p='Rigbaukasten')
     pm.menuItem(label='Store Selected shape', c=store_selected_shape_cmd, p='Rigbaukasten')
     change_ctl_shape_menu()
+    pm.menuItem(divider=True, label='Tools', p='Rigbaukasten')
+    pm.menuItem(label='Fk Ik Snap', c=lambda _: fkiksnaptool.FkIkSnapUI(), p='Rigbaukasten')
 
 
 def set_environemtn():
