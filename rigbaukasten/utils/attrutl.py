@@ -1,14 +1,14 @@
 import pymel.core as pm
 
 
-def add(obj, attr_name='attr', typ='float', mn=None, mx=None, default=0, k=True, cb=True):
+def add(obj, attr_name='attr', typ='float', mn=None, mx=None, default=0, k=True, cb=True, multi=False):
     # add attribute
     if typ.endswith('3'):
-        pm.addAttr(obj, attributeType=typ, longName=attr_name)
+        pm.addAttr(obj, attributeType=typ, longName=attr_name, multi=multi)
         for ax in 'XYZ':
             pm.addAttr(obj, attributeType=typ[:-1], longName=attr_name + ax, p=attr_name, dv=default)
     else:
-        pm.addAttr(obj, attributeType=typ, longName=attr_name, dv=default)
+        pm.addAttr(obj, attributeType=typ, longName=attr_name, dv=default, multi=multi)
     plug = pm.PyNode(f'{obj}.{attr_name}')
     if mn is not None:
         pm.addAttr(plug, e=True, min=mn)
@@ -34,21 +34,21 @@ def add_compound(obj, attr_name, typ, child_names, k=True, cb=True, **kwargs):
     return compound_plug, child_plugs
 
 
-def add_string(obj, attr_name, default=''):
+def add_string(obj, attr_name, default='', multi=False):
     plug_name = f'{obj}.{attr_name}'
     if pm.objExists(plug_name):
         return pm.PyNode(plug_name)
-    pm.addAttr(obj, dt='string', longName=attr_name)
+    pm.addAttr(obj, dt='string', longName=attr_name, multi=multi)
     plug = pm.PyNode(plug_name)
     plug.set(default)
     return plug
 
 
-def add_message(obj, attr_name):
+def add_message(obj, attr_name, multi=False):
     plug_name = f'{obj}.{attr_name}'
     if pm.objExists(plug_name):
         return pm.PyNode(plug_name)
-    pm.addAttr(obj, at='message', longName=attr_name)
+    pm.addAttr(obj, at='message', longName=attr_name, multi=multi)
     plug = pm.PyNode(plug_name)
     return plug
 

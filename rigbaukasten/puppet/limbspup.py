@@ -1,7 +1,7 @@
 import pymel.core as pm
 
 from rigbaukasten.core import modulecor
-from rigbaukasten.functions import chainfunc, twistfunc
+from rigbaukasten.functions import chainfunc, twistfunc, animtoolsfunc
 from rigbaukasten.library import controllib, jointlib, posereaderlib, guidelib, curvelib
 from rigbaukasten.utils import attrutl, connectutl
 
@@ -420,6 +420,31 @@ class FKIkLimb(modulecor.RigPuppetModule):
             output_ctls['foot'] = self.foot_ctl.trn
         return output_ctls
 
+    def create_fk_ik_snap_network(self):
+        pole_target = pm.group(em=True, n=self.mk('poleSnapTarget_TRN'), p=self.fk_joints[0])
+        pm.matchTransform(pole_target, self.ik_ctls[0].trn)
+        pole_target.hide()
+
+        ik_target = pm.group(em=True, n=self.mk('toIkSnapTarget_TRN'), p=self.fk_joints[2])
+        if self.as_leg:
+            pm.matchTransform(ik_target, self.ik_ctls[1].trn)
+        elif self.side == 'R':
+            ik_target.rx.set(-180)
+
+        ik_set_attrs = {1: [self.fk_ik_plug]}
+        if self.with_foot:
+            ik_set_attrs[0] = [self.ik_ctls[1].trn.roll, self.ik_ctls[1].trn.rock]
+
+        animtoolsfunc.fk_ik_snap_network_create(
+            module_name=self.module_key,
+            ik_ctls=[a.trn for a in self.ik_ctls],
+            ik_targets=[pole_target, ik_target],
+            fk_ctls=[a.trn for a in self.fk_ctls],
+            fk_targets=self.ik_joints,
+            ik_set_attrs=ik_set_attrs,
+            fk_set_attrs={0: [self.fk_ik_plug]}
+        )
+
     def connect_to_hook(self):
         self.constraint_to_hook(driven=self.root_hook_grp)
         self.constraint_to_hook(driven=self.end_hook_grp, hook=self.ik_hook)
@@ -467,6 +492,7 @@ class FKIkLimb(modulecor.RigPuppetModule):
 
         self.foot_roll()
         self.store_output_data(ctls=self.compose_output_ctls_dict())
+        self.create_fk_ik_snap_network()
 
         self.create_twist_ctls()
         self.setup_twist_ctls()
